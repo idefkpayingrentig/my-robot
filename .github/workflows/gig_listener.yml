@@ -1,0 +1,21 @@
+name: Gig Tag Listener
+
+on:
+  repository_dispatch:
+    types: [new_gig_found]
+
+jobs:
+  create_gig_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Tracking Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const payload = context.payload.client_payload;
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[${payload.platform}] New Gig: ${payload.title}`,
+              body: `**Platform:** ${payload.platform}\n**Matched Tag:** ${payload.tag}\n**Link:** ${payload.link}\n\n**Details:**\n${payload.description || 'No description provided.'}`
+            });
